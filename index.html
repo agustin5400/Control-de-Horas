@@ -1,13 +1,9 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <link rel="manifest" href="manifest.json">
-<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
-<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
-<meta name="theme-color" content="#4361ee">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Control de Horas - Acumulado Mensual</title>
+    <title>Control de Horas</title>
     <style>
         * {
             margin: 0;
@@ -161,7 +157,7 @@
             border: 1px solid #ddd;
         }
 
-        /* ✅ ACUMULADO MENSUAL */
+        /* ACUMULADO MENSUAL */
         .monthly-summary {
             background: #e3f2fd;
             border-radius: 5px;
@@ -286,7 +282,7 @@
             <input type="text" id="proyectoInput" placeholder="Nombre del proyecto">
         </div>
 
-        <!-- ✅ RESUMEN MENSUAL -->
+        <!-- RESUMEN MENSUAL -->
         <div class="monthly-summary">
             <h3>📊 Horas por Mes</h3>
             <div id="monthlyHours">No hay datos mensuales</div>
@@ -320,7 +316,7 @@
         const historialEl = document.getElementById('historial');
         const categoriaSelector = document.getElementById('categoriaSelector');
         const proyectoInput = document.getElementById('proyectoInput');
-        const monthlyHoursEl = document.getElementById('monthlyHours'); // ✅ Elemento mensual
+        const monthlyHoursEl = document.getElementById('monthlyHours');
 
         // Aplicar modo oscuro al cargar
         function aplicarModoOscuro() {
@@ -339,7 +335,7 @@
             salidaBtn.disabled = true;
         }
 
-        // ✅ CALCULAR HORAS POR MES
+        // CALCULAR HORAS POR MES
         function calcularHorasPorMes() {
             if (horasTrabajadas.length === 0) {
                 monthlyHoursEl.innerHTML = '<p style="text-align: center; color: #666;">No hay datos mensuales</p>';
@@ -382,7 +378,7 @@
             monthlyHoursEl.innerHTML = html;
         }
 
-        // ✅ OBTENER NOMBRE DEL MES
+        // OBTENER NOMBRE DEL MES
         function obtenerNombreMes(numeroMes) {
             const meses = [
                 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -391,7 +387,7 @@
             return meses[numeroMes];
         }
 
-        // ✅ FUNCIÓN DE BACKUP
+        // FUNCIÓN DE BACKUP
         function hacerBackup() {
             if (horasTrabajadas.length === 0) {
                 alert('No hay datos para respaldar');
@@ -424,7 +420,7 @@
             aplicarModoOscuro();
             inicializarBotones();
             cargarHistorial();
-            calcularHorasPorMes(); // ✅ Calcular horas mensuales
+            calcularHorasPorMes();
             actualizarDisplay();
         });
 
@@ -480,7 +476,7 @@
             resetTimer();
             proyectoInput.value = '';
             cargarHistorial();
-            calcularHorasPorMes(); // ✅ Actualizar resumen mensual
+            calcularHorasPorMes();
         }
 
         function startTimer() {
@@ -565,5 +561,3 @@
     </script>
 </body>
 </html>
-
-
