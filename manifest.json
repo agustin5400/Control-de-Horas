@@ -1,21 +1,11 @@
 {
-  "name": "Control de Horas",
-  "short_name": "Horas",
-  "description": "Aplicación para controlar horas trabajadas",
-  "start_url": "/",
+  "background_color": "#1325e8",
+  "dir": "ltr",
   "display": "standalone",
-  "background_color": "#4361ee",
-  "theme_color": "#4361ee",
-  "icons": [
-    {
-      "src": "icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
-  ]
+  "name": "Control De Horas",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "Horas",
+  "start_url": "/",
+  "theme_color": "#1325e8"
 }
