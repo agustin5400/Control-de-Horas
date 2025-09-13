@@ -4,16 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Control de Horas</title>
+    <link rel="manifest" href="manifest.json">
     <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: Arial, sans-serif; background: #f0f2f5; padding: 20px; max-width: 600px; margin: 0 auto; }
         .container { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        h1 { text-align: center; color: #333; }
-        .controls { display: flex; gap: 10px; margin: 20px 0; }
-        .btn { padding: 12px 20px; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; flex: 1; }
+        h1 { text-align: center; color: #333; margin-bottom: 20px; }
+        .controls { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .btn { padding: 12px 20px; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; flex: 1; min-width: 120px; }
         .btn-entrada { background: #4CAF50; color: white; }
         .btn-salida { background: #f44336; color: white; }
-        .timer { text-align: center; padding: 20px; background: #e8f5e8; border-radius: 5px; }
-        .time-display { font-size: 2rem; font-weight: bold; font-family: monospace; }
+        .btn-reset { background: #ff9800; color: white; }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .timer { text-align: center; padding: 20px; background: #e8f5e8; border-radius: 5px; margin-bottom: 20px; }
+        .time-display { font-size: 2rem; font-weight: bold; font-family: monospace; margin: 10px 0; }
+        #status { font-size: 1.1rem; color: #666; }
+        .history h2 { margin-bottom: 10px; color: #333; }
+        #historial { max-height: 300px; overflow-y: auto; }
+        .record { background: #f9f9f9; border-left: 3px solid #4CAF50; padding: 10px; margin-bottom: 10px; border-radius: 3px; }
+        .record-date { font-weight: bold; color: #333; }
+        .record-hours { color: #666; }
     </style>
 </head>
 <body>
@@ -22,6 +32,7 @@
         <div class="controls">
             <button id="entradaBtn" class="btn btn-entrada">📥 Entrada</button>
             <button id="salidaBtn" class="btn btn-salida">📤 Salida</button>
+            <button id="resetBtn" class="btn btn-reset">🔄 Reset</button>
         </div>
         <div class="timer">
             <div class="time-display">
@@ -29,55 +40,120 @@
             </div>
             <div id="status">Esperando registro...</div>
         </div>
+        <div class="history">
+            <h2>📋 Historial</h2>
+            <div id="historial">No hay registros</div>
+        </div>
     </div>
     <script>
         let entradaTime = null;
         let tiempoTranscurrido = 0;
         let intervalId = null;
-        
+        let horasTrabajadas = JSON.parse(localStorage.getItem('horasTrabajadas')) || [];
         const entradaBtn = document.getElementById('entradaBtn');
         const salidaBtn = document.getElementById('salidaBtn');
+        const resetBtn = document.getElementById('resetBtn');
         const hoursEl = document.getElementById('hours');
         const minutesEl = document.getElementById('minutes');
         const secondsEl = document.getElementById('seconds');
         const statusEl = document.getElementById('status');
+        const historialEl = document.getElementById('historial');
         
-        entradaBtn.addEventListener('click', function() {
+        function inicializarBotones() {
+            entradaBtn.disabled = false;
+            salidaBtn.disabled = true;
+        }
+        
+        window.addEventListener('load', function() {
+            inicializarBotones();
+            cargarHistorial();
+            actualizarDisplay();
+        });
+        
+        entradaBtn.addEventListener('click', registrarEntrada);
+        salidaBtn.addEventListener('click', registrarSalida);
+        resetBtn.addEventListener('click', resetTimer);
+        
+        function registrarEntrada() {
             entradaTime = new Date();
             tiempoTranscurrido = 0;
-            if (intervalId) clearInterval(intervalId);
-            intervalId = setInterval(() => {
-                tiempoTranscurrido++;
-                const hours = Math.floor(tiempoTranscurrido / 3600);
-                const minutes = Math.floor((tiempoTranscurrido % 3600) / 60);
-                const seconds = tiempoTranscurrido % 60;
-                hoursEl.textContent = hours.toString().padStart(2, '0');
-                minutesEl.textContent = minutes.toString().padStart(2, '0');
-                secondsEl.textContent = seconds.toString().padStart(2, '0');
-            }, 1000);
+            startTimer();
             statusEl.textContent = 'Trabajando...';
             statusEl.style.color = '#4CAF50';
             entradaBtn.disabled = true;
             salidaBtn.disabled = false;
-        });
+            alert('✅ Entrada registrada: ' + entradaTime.toLocaleTimeString());
+        }
         
-        salidaBtn.addEventListener('click', function() {
-            if (!entradaTime) return;
-            if (intervalId) clearInterval(intervalId);
+        function registrarSalida() {
+            if (!entradaTime) {
+                alert('Primero debes registrar la entrada');
+                return;
+            }
             const salidaTime = new Date();
             const diffMs = salidaTime - entradaTime;
             const diffHoras = diffMs / (1000 * 60 * 60);
-            alert(`Has trabajado ${diffHoras.toFixed(2)} horas`);
+            const registro = {
+                fecha: entradaTime.toDateString(),
+                entrada: entradaTime.toLocaleTimeString(),
+                salida: salidaTime.toLocaleTimeString(),
+                horas: diffHoras
+            };
+            horasTrabajadas.push(registro);
+            localStorage.setItem('horasTrabajadas', JSON.stringify(horasTrabajadas));
+            alert(`✅ Has trabajado ${diffHoras.toFixed(2)} horas`);
+            resetTimer();
+            cargarHistorial();
+        }
+        
+        function startTimer() {
+            if (intervalId) clearInterval(intervalId);
+            intervalId = setInterval(() => {
+                tiempoTranscurrido++;
+                actualizarDisplay();
+            }, 1000);
+        }
+        
+        function actualizarDisplay() {
+            const hours = Math.floor(tiempoTranscurrido / 3600);
+            const minutes = Math.floor((tiempoTranscurrido % 3600) / 60);
+            const seconds = tiempoTranscurrido % 60;
+            hoursEl.textContent = hours.toString().padStart(2, '0');
+            minutesEl.textContent = minutes.toString().padStart(2, '0');
+            secondsEl.textContent = seconds.toString().padStart(2, '0');
+        }
+        
+        function resetTimer() {
+            if (intervalId) {
+                clearInterval(intervalId);
+                intervalId = null;
+            }
             tiempoTranscurrido = 0;
-            hoursEl.textContent = '00';
-            minutesEl.textContent = '00';
-            secondsEl.textContent = '00';
+            entradaTime = null;
+            actualizarDisplay();
             statusEl.textContent = 'Esperando registro...';
             statusEl.style.color = '#666';
-            entradaBtn.disabled = false;
-            salidaBtn.disabled = true;
-        });
+            inicializarBotones();
+        }
+        
+        function cargarHistorial() {
+            if (horasTrabajadas.length === 0) {
+                historialEl.innerHTML = '<p style="text-align: center; color: #666;">No hay registros</p>';
+                return;
+            }
+            historialEl.innerHTML = '';
+            const ultimosRegistros = horasTrabajadas.slice(-10).reverse();
+            ultimosRegistros.forEach(registro => {
+                const div = document.createElement('div');
+                div.className = 'record';
+                div.innerHTML = `
+                    <div class="record-date">${registro.fecha}</div>
+                    <div class="record-hours">${registro.horas.toFixed(2)} horas</div>
+                    <small>${registro.entrada} - ${registro.salida}</small>
+                `;
+                historialEl.appendChild(div);
+            });
+        }
     </script>
 </body>
 </html>
-
