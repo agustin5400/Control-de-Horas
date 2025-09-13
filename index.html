@@ -4,439 +4,76 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Control de Horas</title>
+    <link rel="manifest" href="manifest.json">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: Arial, sans-serif;
-            background: #f0f2f5;
-            color: #333;
-            padding: 20px;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        body.dark-mode {
-            background: #1a1a2e;
-            color: #e6e6e6;
-        }
-
-        body.dark-mode .container {
-            background: #16213e;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-        }
-
-        body.dark-mode .timer {
-            background: #0f3460;
-        }
-
-        body.dark-mode .category-selector {
-            background: #16213e;
-        }
-
-        body.dark-mode .record {
-            background: #16213e;
-            border-left-color: #4CAF50;
-        }
-
-        body.dark-mode .category-selector select,
-        body.dark-mode .category-selector input {
-            background: #16213e;
-            color: #e6e6e6;
-            border-color: #444;
-        }
-
-        body.dark-mode h1 {
-            color: #4cc9f0;
-        }
-
-        body.dark-mode .time-display {
-            color: #4cc9f0;
-        }
-
-        body.dark-mode #status {
-            color: #aaa;
-        }
-
-        body.dark-mode .record-date {
-            color: #e6e6e6;
-        }
-
-        body.dark-mode .record-hours {
-            color: #aaa;
-        }
-
-        body.dark-mode .history h2 {
-            color: #4cc9f0;
-        }
-
-        .container {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        h1 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 20px;
-        }
-
-        .controls {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            padding: 12px 20px;
-            border: none;
-            border-radius: 5px;
-            font-size: 16px;
-            cursor: pointer;
-            flex: 1;
-            min-width: 120px;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f0f2f5; padding: 20px; max-width: 600px; margin: 0 auto; }
+        .container { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #333; margin-bottom: 20px; }
+        .controls { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .btn { padding: 12px 20px; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; flex: 1; min-width: 120px; }
         .btn-entrada { background: #4CAF50; color: white; }
         .btn-salida { background: #f44336; color: white; }
         .btn-reset { background: #ff9800; color: white; }
-        .btn-export { background: #2196F3; color: white; }
-        .btn-backup { background: #607d8b; color: white; }
-        .btn-theme { background: #9c27b0; color: white; }
-
-        .btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        .timer {
-            text-align: center;
-            padding: 20px;
-            background: #e8f5e8;
-            border-radius: 5px;
-            margin-bottom: 20px;
-        }
-
-        .time-display {
-            font-size: 2rem;
-            font-weight: bold;
-            font-family: monospace;
-            margin: 10px 0;
-            color: #333;
-        }
-
-        #status {
-            font-size: 1.1rem;
-            color: #666;
-        }
-
-        .category-selector {
-            margin: 20px 0;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 5px;
-        }
-
-        .category-selector label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-        }
-
-        .category-selector select, .category-selector input {
-            width: 100%;
-            padding: 10px;
-            border-radius: 5px;
-            border: 1px solid #ddd;
-        }
-
-        /* ACUMULADO MENSUAL */
-        .monthly-summary {
-            background: #e3f2fd;
-            border-radius: 5px;
-            padding: 15px;
-            margin: 20px 0;
-        }
-
-        body.dark-mode .monthly-summary {
-            background: #0f3460;
-        }
-
-        .monthly-summary h3 {
-            margin-bottom: 10px;
-            color: #1976d2;
-        }
-
-        body.dark-mode .monthly-summary h3 {
-            color: #4cc9f0;
-        }
-
-        .month-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid #ddd;
-        }
-
-        body.dark-mode .month-item {
-            border-bottom: 1px solid #444;
-        }
-
-        .month-name {
-            font-weight: bold;
-        }
-
-        .month-hours {
-            font-weight: bold;
-            color: #1976d2;
-        }
-
-        body.dark-mode .month-hours {
-            color: #4cc9f0;
-        }
-
-        .history {
-            margin-top: 20px;
-        }
-
-        .history h2 {
-            margin-bottom: 10px;
-            color: #333;
-        }
-
-        #historial {
-            max-height: 300px;
-            overflow-y: auto;
-        }
-
-        .record {
-            background: #f9f9f9;
-            border-left: 3px solid #4CAF50;
-            padding: 10px;
-            margin-bottom: 10px;
-            border-radius: 3px;
-        }
-
-        .record-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 5px;
-        }
-
-        .record-date {
-            font-weight: bold;
-            color: #333;
-        }
-
-        .record-category {
-            background: #ff9800;
-            color: white;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-size: 0.8rem;
-        }
-
-        .record-hours {
-            color: #666;
-        }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .timer { text-align: center; padding: 20px; background: #e8f5e8; border-radius: 5px; margin-bottom: 20px; }
+        .time-display { font-size: 2rem; font-weight: bold; font-family: monospace; margin: 10px 0; }
+        #status { font-size: 1.1rem; color: #666; }
+        .history h2 { margin-bottom: 10px; color: #333; }
+        #historial { max-height: 300px; overflow-y: auto; }
+        .record { background: #f9f9f9; border-left: 3px solid #4CAF50; padding: 10px; margin-bottom: 10px; border-radius: 3px; }
+        .record-date { font-weight: bold; color: #333; }
+        .record-hours { color: #666; }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>⏱️ Control de Horas</h1>
-        
         <div class="controls">
             <button id="entradaBtn" class="btn btn-entrada">📥 Entrada</button>
             <button id="salidaBtn" class="btn btn-salida">📤 Salida</button>
             <button id="resetBtn" class="btn btn-reset">🔄 Reset</button>
-            <button id="exportBtn" class="btn btn-export">📊 Exportar CSV</button>
-            <button id="backupBtn" class="btn btn-backup">☁️ Backup</button>
-            <button id="themeBtn" class="btn btn-theme">🌙 Modo Oscuro</button>
         </div>
-
         <div class="timer">
             <div class="time-display">
                 <span id="hours">00</span>:<span id="minutes">00</span>:<span id="seconds">00</span>
             </div>
             <div id="status">Esperando registro...</div>
         </div>
-
-        <div class="category-selector">
-            <label>🏷️ Categoría de Trabajo</label>
-            <select id="categoriaSelector">
-                <option value="Desarrollo">Desarrollo</option>
-                <option value="Reuniones">Reuniones</option>
-                <option value="Formación">Formación</option>
-                <option value="Administración">Administración</option>
-                <option value="Diseño">Diseño</option>
-                <option value="Otros">Otros</option>
-            </select>
-            <label style="margin-top: 10px;">📝 Proyecto (Opcional)</label>
-            <input type="text" id="proyectoInput" placeholder="Nombre del proyecto">
-        </div>
-
-        <!-- RESUMEN MENSUAL -->
-        <div class="monthly-summary">
-            <h3>📊 Horas por Mes</h3>
-            <div id="monthlyHours">No hay datos mensuales</div>
-        </div>
-
         <div class="history">
             <h2>📋 Historial</h2>
             <div id="historial">No hay registros</div>
         </div>
     </div>
-
     <script>
-        // Variables globales
         let entradaTime = null;
         let tiempoTranscurrido = 0;
         let intervalId = null;
         let horasTrabajadas = JSON.parse(localStorage.getItem('horasTrabajadas')) || [];
-        let darkMode = localStorage.getItem('darkMode') === 'true';
-
-        // Elementos
         const entradaBtn = document.getElementById('entradaBtn');
         const salidaBtn = document.getElementById('salidaBtn');
         const resetBtn = document.getElementById('resetBtn');
-        const exportBtn = document.getElementById('exportBtn');
-        const backupBtn = document.getElementById('backupBtn');
-        const themeBtn = document.getElementById('themeBtn');
         const hoursEl = document.getElementById('hours');
         const minutesEl = document.getElementById('minutes');
         const secondsEl = document.getElementById('seconds');
         const statusEl = document.getElementById('status');
         const historialEl = document.getElementById('historial');
-        const categoriaSelector = document.getElementById('categoriaSelector');
-        const proyectoInput = document.getElementById('proyectoInput');
-        const monthlyHoursEl = document.getElementById('monthlyHours');
-
-        // Aplicar modo oscuro al cargar
-        function aplicarModoOscuro() {
-            if (darkMode) {
-                document.body.classList.add('dark-mode');
-                themeBtn.textContent = '☀️ Modo Claro';
-            } else {
-                document.body.classList.remove('dark-mode');
-                themeBtn.textContent = '🌙 Modo Oscuro';
-            }
-        }
-
-        // Inicializar estado de botones
+        
         function inicializarBotones() {
             entradaBtn.disabled = false;
             salidaBtn.disabled = true;
         }
-
-        // CALCULAR HORAS POR MES
-        function calcularHorasPorMes() {
-            if (horasTrabajadas.length === 0) {
-                monthlyHoursEl.innerHTML = '<p style="text-align: center; color: #666;">No hay datos mensuales</p>';
-                return;
-            }
-
-            // Agrupar horas por mes
-            const horasPorMes = {};
-            
-            horasTrabajadas.forEach(registro => {
-                const fecha = new Date(registro.fecha);
-                const mesKey = `${fecha.getFullYear()}-${(fecha.getMonth() + 1).toString().padStart(2, '0')}`;
-                const mesNombre = obtenerNombreMes(fecha.getMonth()) + ' ' + fecha.getFullYear();
-                
-                if (!horasPorMes[mesKey]) {
-                    horasPorMes[mesKey] = {
-                        nombre: mesNombre,
-                        horas: 0
-                    };
-                }
-                
-                horasPorMes[mesKey].horas += registro.horas;
-            });
-
-            // Ordenar por fecha (más reciente primero)
-            const mesesOrdenados = Object.keys(horasPorMes).sort((a, b) => b.localeCompare(a));
-
-            // Mostrar resumen
-            let html = '';
-            mesesOrdenados.forEach(mesKey => {
-                const mesData = horasPorMes[mesKey];
-                html += `
-                    <div class="month-item">
-                        <span class="month-name">${mesData.nombre}:</span>
-                        <span class="month-hours">${mesData.horas.toFixed(2)} horas</span>
-                    </div>
-                `;
-            });
-
-            monthlyHoursEl.innerHTML = html;
-        }
-
-        // OBTENER NOMBRE DEL MES
-        function obtenerNombreMes(numeroMes) {
-            const meses = [
-                'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-                'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
-            ];
-            return meses[numeroMes];
-        }
-
-        // FUNCIÓN DE BACKUP
-        function hacerBackup() {
-            if (horasTrabajadas.length === 0) {
-                alert('No hay datos para respaldar');
-                return;
-            }
-
-            const backupData = {
-                horasTrabajadas: horasTrabajadas,
-                fechaBackup: new Date().toISOString(),
-                totalRegistros: horasTrabajadas.length,
-                version: "1.0"
-            };
-            
-            const jsonString = JSON.stringify(backupData, null, 2);
-            const blob = new Blob([jsonString], { type: 'application/json;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.setAttribute('href', url);
-            link.setAttribute('download', `backup_horas_${new Date().toISOString().split('T')[0]}.json`);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            alert('✅ Backup creado correctamente');
-        }
-
-        // Inicializar cuando la página carga
+        
         window.addEventListener('load', function() {
-            aplicarModoOscuro();
             inicializarBotones();
             cargarHistorial();
-            calcularHorasPorMes();
             actualizarDisplay();
         });
-
-        // Eventos
+        
         entradaBtn.addEventListener('click', registrarEntrada);
         salidaBtn.addEventListener('click', registrarSalida);
         resetBtn.addEventListener('click', resetTimer);
-        exportBtn.addEventListener('click', exportarCSV);
-        backupBtn.addEventListener('click', hacerBackup);
         
-        themeBtn.addEventListener('click', function() {
-            darkMode = !darkMode;
-            localStorage.setItem('darkMode', darkMode);
-            aplicarModoOscuro();
-        });
-
         function registrarEntrada() {
             entradaTime = new Date();
             tiempoTranscurrido = 0;
@@ -445,40 +82,30 @@
             statusEl.style.color = '#4CAF50';
             entradaBtn.disabled = true;
             salidaBtn.disabled = false;
-            
             alert('✅ Entrada registrada: ' + entradaTime.toLocaleTimeString());
         }
-
+        
         function registrarSalida() {
             if (!entradaTime) {
                 alert('Primero debes registrar la entrada');
                 return;
             }
-
             const salidaTime = new Date();
             const diffMs = salidaTime - entradaTime;
             const diffHoras = diffMs / (1000 * 60 * 60);
-            
             const registro = {
                 fecha: entradaTime.toDateString(),
                 entrada: entradaTime.toLocaleTimeString(),
                 salida: salidaTime.toLocaleTimeString(),
-                horas: diffHoras,
-                categoria: categoriaSelector.value,
-                proyecto: proyectoInput.value || 'Sin proyecto'
+                horas: diffHoras
             };
-
             horasTrabajadas.push(registro);
             localStorage.setItem('horasTrabajadas', JSON.stringify(horasTrabajadas));
-
-            alert(`✅ Has trabajado ${diffHoras.toFixed(2)} horas\nCategoría: ${registro.categoria}`);
-            
+            alert(`✅ Has trabajado ${diffHoras.toFixed(2)} horas`);
             resetTimer();
-            proyectoInput.value = '';
             cargarHistorial();
-            calcularHorasPorMes();
         }
-
+        
         function startTimer() {
             if (intervalId) clearInterval(intervalId);
             intervalId = setInterval(() => {
@@ -486,17 +113,16 @@
                 actualizarDisplay();
             }, 1000);
         }
-
+        
         function actualizarDisplay() {
             const hours = Math.floor(tiempoTranscurrido / 3600);
             const minutes = Math.floor((tiempoTranscurrido % 3600) / 60);
             const seconds = tiempoTranscurrido % 60;
-
             hoursEl.textContent = hours.toString().padStart(2, '0');
             minutesEl.textContent = minutes.toString().padStart(2, '0');
             secondsEl.textContent = seconds.toString().padStart(2, '0');
         }
-
+        
         function resetTimer() {
             if (intervalId) {
                 clearInterval(intervalId);
@@ -509,51 +135,21 @@
             statusEl.style.color = '#666';
             inicializarBotones();
         }
-
-        function exportarCSV() {
-            if (horasTrabajadas.length === 0) {
-                alert('No hay datos para exportar');
-                return;
-            }
-
-            let csv = 'Fecha,Entrada,Salida,Horas,Categoría,Proyecto\n';
-            horasTrabajadas.forEach(registro => {
-                csv += `"${registro.fecha}","${registro.entrada}","${registro.salida}",${registro.horas.toFixed(2)},"${registro.categoria}","${registro.proyecto}"\n`;
-            });
-
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.setAttribute('href', url);
-            link.setAttribute('download', `horas_trabajadas_${new Date().toISOString().split('T')[0]}.csv`);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            alert('✅ Archivo CSV descargado correctamente');
-        }
-
+        
         function cargarHistorial() {
             if (horasTrabajadas.length === 0) {
                 historialEl.innerHTML = '<p style="text-align: center; color: #666;">No hay registros</p>';
                 return;
             }
-
             historialEl.innerHTML = '';
             const ultimosRegistros = horasTrabajadas.slice(-10).reverse();
-            
             ultimosRegistros.forEach(registro => {
                 const div = document.createElement('div');
                 div.className = 'record';
                 div.innerHTML = `
-                    <div class="record-header">
-                        <div class="record-date">${registro.fecha}</div>
-                        <div class="record-category">${registro.categoria}</div>
-                    </div>
+                    <div class="record-date">${registro.fecha}</div>
                     <div class="record-hours">${registro.horas.toFixed(2)} horas</div>
                     <small>${registro.entrada} - ${registro.salida}</small>
-                    ${registro.proyecto !== 'Sin proyecto' ? `<div><small>📝 ${registro.proyecto}</small></div>` : ''}
                 `;
                 historialEl.appendChild(div);
             });
